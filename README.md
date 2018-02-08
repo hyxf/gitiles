@@ -1,4 +1,4 @@
-## 基于gradle的Gitles项目
+## 基于gradle的Gitiles项目
 
 > gitiles 2.15【new】
 
