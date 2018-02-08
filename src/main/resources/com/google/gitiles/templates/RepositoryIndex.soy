@@ -1,0 +1,132 @@
+// Copyright 2012 Google Inc. All Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+{namespace gitiles}
+
+/**
+ * Index page for a repository.
+ *
+ * @param repositoryName name of this repository.
+ * @param? menuEntries menu entries.
+ * @param? customVariant variant name for custom styling.
+ * @param breadcrumbs breadcrumbs for this page.
+ * @param cloneUrl clone URL for this repository.
+ * @param description description text of the repository.
+ * @param? mirroredFromUrl URL this repository is mirrored from.
+ * @param branches list of branch objects with url, name, and isHead keys.
+ * @param? moreBranchesUrl URL to show more branches, if necessary.
+ * @param tags list of tag objects with url and name keys.
+ * @param? moreTagsUrl URL to show more branches, if necessary.
+ * @param hasLog whether a log should be shown for HEAD.
+ * @param? readmeHtml optional rendered README.md contents.
+ */
+{template .repositoryIndex stricthtml="false"}
+{if $readmeHtml}
+  {call .header data="all"}
+    {param title: $repositoryName /}
+    {param repositoryName: null /}
+    {param menuEntries: $menuEntries /}
+    {param customVariant: $customVariant /}
+    {param breadcrumbs: $breadcrumbs /}
+    {param css: [gitiles.DOC_CSS_URL] /}
+  {/call}
+{else}
+  {call .header}
+    {param title: $repositoryName /}
+    {param repositoryName: null /}
+    {param menuEntries: $menuEntries /}
+    {param customVariant: $customVariant /}
+    {param breadcrumbs: $breadcrumbs /}
+  {/call}
+{/if}
+
+{if $description}
+  <h2 class="RepoDescription">{$description}</h2>
+{/if}
+
+{if $mirroredFromUrl}
+  <div class="RepoMirroredFrom">
+    {msg desc="Informational text describing source of repository"}
+      Mirrored from <a href="{$mirroredFromUrl}">{$mirroredFromUrl}</a>
+    {/msg}
+  </div>
+{/if}
+
+<div class="CloneRepo">
+  <div class="CloneRepo-title">Clone this repo:</div>
+  <input type="text" class="u-monospace CloneRepo-command"
+         onclick="this.focus();if(this.selectionStart==this.selectionEnd){lb}this.select(){rb}"
+         readonly="readonly" value="git clone {$cloneUrl}">
+</div>
+
+{if $hasLog and (length($branches) or length($tags))}
+  <div class="RepoShortlog">
+    <div class="RepoShortlog-refs">
+      {call .branches_ data="all" /}
+      {call .tags_ data="all" /}
+    </div>
+    <div class="RepoShortlog-log">
+      {call .streamingPlaceholder /}
+      {if $readmeHtml}
+        <div class="doc RepoIndexDoc">{$readmeHtml}</div>
+      {/if}
+    </div>
+  </div>
+
+{elseif $hasLog}
+  {call .streamingPlaceholder /}
+{elseif length($branches) or length($tags)}
+  {call .branches_ data="all" /}
+  {call .tags_ data="all" /}
+{/if}
+
+{call .footer}
+  {param customVariant: $customVariant /}
+{/call}
+{/template}
+
+/**
+ * List of branches.
+ *
+ * @param? branches list of branch objects with url and name keys.
+ * @param? moreBranchesUrl URL to show more branches, if necessary.
+ */
+{template .branches_ visibility="private"}
+  {if length($branches)}
+    {call .refList}
+      {param type: 'Branches' /}
+      {param refs: $branches /}
+    {/call}
+    {if $moreBranchesUrl}
+      <a href="{$moreBranchesUrl}">{msg desc="link to view more branches"}More...{/msg}</a>
+    {/if}
+  {/if}
+{/template}
+
+/**
+ * List of tags.
+ *
+ * @param? tags list of branch objects with url and name keys.
+ * @param? moreTagsUrl URL to show more tags, if necessary.
+ */
+{template .tags_ visibility="private"}
+  {if length($tags)}
+    {call .refList}
+      {param type: 'Tags' /}
+      {param refs: $tags /}
+    {/call}
+    {if $moreTagsUrl}
+      <a href="{$moreTagsUrl}">{msg desc="link to view more tags"}More...{/msg}</a>
+    {/if}
+  {/if}
+{/template}

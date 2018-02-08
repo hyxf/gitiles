@@ -1,0 +1,73 @@
+group 'com.gutils'
+version '1.0'
+
+apply plugin: 'application'
+
+ext {
+    basePath = project.projectDir.absolutePath
+}
+
+mainClassName = 'com.google.gitiles.dev.Main'
+
+applicationDefaultJvmArgs = ["-Dcom.google.gitiles.configPath=${basePath}/gitiles.config",
+                             "-Dcom.google.gitiles.sourcePath=${basePath}/src/main"]
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile "org.apache.commons:commons-lang3:3.1"
+    compile "com.google.code.gson:gson:2.8.0"
+    compile "com.google.guava:guava:22.0"
+    compile "joda-time:joda-time:2.9.9"
+    compile "com.google.code.findbugs:jsr305:3.0.0"
+    compile "com.github.twalcari:java-prettify:1.2.2"
+    compile "org.nibor.autolink:autolink:0.7.0"
+
+    compile "com.atlassian.commonmark:commonmark:0.10.0"
+    compile "com.atlassian.commonmark:commonmark-ext-autolink:0.10.0"
+    compile "com.atlassian.commonmark:commonmark-ext-gfm-strikethrough:0.10.0"
+    compile "com.atlassian.commonmark:commonmark-ext-gfm-tables:0.10.0"
+
+    compile "com.google.truth:truth:0.35"
+    compile "com.google.template:soy:2017-04-23"
+    compile "com.google.common.html.types:types:1.0.4"
+    compile "com.google.protobuf:protobuf-java:3.0.0-beta-2"
+    compile "com.ibm.icu:icu4j:57.1"
+
+    compile "org.eclipse.jgit:org.eclipse.jgit:4.9.0.201710071750-r"
+    compile "org.eclipse.jgit:org.eclipse.jgit.http.server:4.9.0.201710071750-r"
+    compile "org.eclipse.jgit:org.eclipse.jgit.junit:4.9.0.201710071750-r"
+    compile "org.eclipse.jgit:org.eclipse.jgit.archive:4.9.0.201710071750-r"
+
+    compile "com.googlecode.javaewah:JavaEWAH:1.1.6"
+    compile "org.apache.commons:commons-compress:1.13"
+    compile "org.tukaani:xz:1.4"
+
+    compile "org.slf4j:slf4j-api:1.7.7"
+    compile "org.slf4j:slf4j-simple:1.7.7"
+
+    compile "com.google.inject.extensions:guice-multibindings:4.1.0"
+    compile "com.google.inject:guice:4.1.0"
+    compile "com.google.inject.extensions:guice-assistedinject:4.1.0"
+
+    compile "aopalliance:aopalliance:1.0"
+    compile "javax.inject:javax.inject:1"
+
+    compile "org.eclipse.jetty:jetty-servlet:9.3.18.v20170406"
+    compile "org.eclipse.jetty:jetty-security:9.3.18.v20170406"
+    compile "org.eclipse.jetty:jetty-server:9.3.18.v20170406"
+    compile "org.eclipse.jetty:jetty-continuation:9.3.18.v20170406"
+    compile "org.eclipse.jetty:jetty-http:9.3.18.v20170406"
+    compile "org.eclipse.jetty:jetty-io:9.3.18.v20170406"
+    compile "org.eclipse.jetty:jetty-util:9.3.18.v20170406"
+
+    compile "org.eclipse.jetty.orbit:javax.servlet:2.5.0.v201103041518"
+    compile "org.eclipse.jetty.orbit:javax.servlet:3.0.0.v201112011016"
+
+    testCompile "junit:junit:4.11"
+    testCompile "org.hamcrest:hamcrest-core:1.3"
+}
