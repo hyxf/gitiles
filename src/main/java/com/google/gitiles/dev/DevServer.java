@@ -34,10 +34,7 @@ import java.net.UnknownHostException;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import javax.servlet.Servlet;
 import javax.servlet.http.HttpServletRequest;
 import org.eclipse.jetty.server.Handler;
@@ -50,6 +47,7 @@ import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.resource.PathResource;
 import org.eclipse.jgit.errors.ConfigInvalidException;
 import org.eclipse.jgit.errors.RepositoryNotFoundException;
+import org.eclipse.jgit.http.server.GitServlet;
 import org.eclipse.jgit.lib.Config;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.RepositoryCache;
@@ -144,6 +142,13 @@ class DevServer {
     ServletContextHandler handler = new ServletContextHandler();
     handler.setContextPath("");
     handler.addServlet(new ServletHolder(servlet), "/*");
+    //----- 支持 git http server
+    ServletHolder gitHolder = handler.addServlet(GitServlet.class,"/git/*");
+    Map<String, String> params = new HashMap<String,String>();
+    params.put("base-path",cfg.getString("gitiles",null,"basePath"));
+    params.put("export-all",cfg.getString("gitiles",null,"exportAll"));
+    gitHolder.setInitParameters(params);
+    //-----
     return handler;
   }
 

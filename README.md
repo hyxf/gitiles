@@ -13,3 +13,21 @@
 ~~~bash
 gradle clean run
 ~~~
+
+------------------------------
+
+### 支持 git http server
+
+> 类：DevServer.java
+>
+> 方法：appHandler
+
+~~~java
+    //----- 支持 git http server
+    ServletHolder gitHolder = handler.addServlet(GitServlet.class,"/git/*");
+    Map<String, String> params = new HashMap<String,String>();
+    params.put("base-path",cfg.getString("gitiles",null,"basePath"));
+    params.put("export-all",cfg.getString("gitiles",null,"exportAll"));
+    gitHolder.setInitParameters(params);
+    //-----
+~~~
