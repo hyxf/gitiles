@@ -14,6 +14,10 @@
 gradle clean run
 ~~~
 
+### Mac 服务配置【支持开机启动】
+
+> com.gutils.gitiles.plist
+
 ------------------------------
 
 ### 支持 git http server

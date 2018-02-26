@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN"
+        "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+    <dict>
+        <key>Label</key>
+        <string>com.gutils.gitiles</string>
+
+        <key>WorkingDirectory</key>
+        <string>/Users/hyxf/soft/gitiles-2.15</string>
+
+        <key>ProgramArguments</key>
+        <array>
+            <string>/Users/hyxf/soft/gradle-3.3/bin/gradle</string>
+            <string>clean</string>
+            <string>run</string>
+        </array>
+
+        <key>StandardOutPath</key>
+        <string>/Users/hyxf/soft/gitiles-2.15/log.txt</string>
+        <key>StandardErrorPath</key>
+        <string>/Users/hyxf/soft/gitiles-2.15/log.txt</string>
+
+        <key>KeepAlive</key>
+        <true/>
+
+        <key>RunAtLoad</key>
+	    <true/>
+    </dict>
+</plist>
