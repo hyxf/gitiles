@@ -73,13 +73,13 @@ class DevServer {
 
     DevServer(File cfgFile, MainCli.Params params) throws IOException, ConfigInvalidException {
         Config cfg = defaultConfig(params);
-        if (cfgFile.exists() && cfgFile.isFile()) {
-            FileBasedConfig fcfg = new FileBasedConfig(cfg, cfgFile, FS.DETECTED);
-            fcfg.load();
-            cfg = fcfg;
-        } else {
-            log.info("Config file {} not found, using defaults", cfgFile.getPath());
-        }
+//        if (cfgFile.exists() && cfgFile.isFile()) {
+//            FileBasedConfig fcfg = new FileBasedConfig(cfg, cfgFile, FS.DETECTED);
+//            fcfg.load();
+//            cfg = fcfg;
+//        } else {
+//            log.info("Config file {} not found, using defaults", cfgFile.getPath());
+//        }
         this.cfg = cfg;
         httpd = new Server(params.getPort());
         httpd.setHandler(handler());
