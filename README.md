@@ -1,6 +1,6 @@
 ## 基于gradle的Gitles项目
 
-> gitiles 2.15【new】
+> gitiles 2.0-5
 
 ### 源码改造 2步：
 
@@ -34,4 +34,29 @@ gradle clean run
     params.put("export-all",cfg.getString("gitiles",null,"exportAll"));
     gitHolder.setInitParameters(params);
     //-----
+~~~
+
+### 支持 单独 jar 部署
+
+构建jar 
+
+~~~bash
+gradle clean jar
+~~~
+
+运行
+
+~~~bash
+~ java -jar gitiles-1.0.0.jar
+usage: gitiles -d <arg> [-i <arg>] [-p <arg>] [-t <arg>] [-u <arg>]
+
+gitiles
+
+ -d,--dir <arg>     git mirror directory
+ -i,--ip <arg>      ip
+ -p,--port <arg>    port
+ -t,--title <arg>   Web title
+ -u,--url <arg>     git url
+
+make it easy!
 ~~~
