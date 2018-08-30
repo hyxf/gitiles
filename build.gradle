@@ -1,22 +1,7 @@
-buildscript {
-    repositories {
-        mavenCentral()
-    }
-    dependencies {
-        classpath 'org.springframework.boot:spring-boot-gradle-plugin:2.0.4.RELEASE'
-    }
-}
-
 group 'com.gutils'
 version '1.0'
 
-apply plugin: 'application'
-
-apply plugin: 'org.springframework.boot'
-
-springBoot {
-    mainClassName "com.google.gitiles.MainCli"
-}
+apply plugin: 'java'
 
 sourceSets {
     main {
@@ -29,6 +14,21 @@ sourceSets {
     }
 }
 
+jar {
+    manifest {
+        attributes "Main-Class": "com.google.gitiles.MainCli"
+    }
+
+    from {
+        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+
+    exclude 'META-INF/*.RSA', 'META-INF/*.SF', 'META-INF/*.DSA'
+}
+
+//-----
+apply plugin: 'application'
+
 ext {
     basePath = project.projectDir.absolutePath
 }
@@ -39,6 +39,7 @@ applicationDefaultJvmArgs = ["-Dcom.google.gitiles.configPath=${basePath}/gitile
                              "-Dcom.google.gitiles.sourcePath=${basePath}/src/main"]
 
 sourceCompatibility = 1.8
+//-----
 
 repositories {
     mavenCentral()

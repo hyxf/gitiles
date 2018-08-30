@@ -24,7 +24,9 @@ import org.eclipse.jetty.server.handler.ContextHandlerCollection;
 import org.eclipse.jetty.server.handler.ResourceHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.util.resource.JarResource;
 import org.eclipse.jetty.util.resource.PathResource;
+import org.eclipse.jetty.util.resource.Resource;
 import org.eclipse.jgit.errors.ConfigInvalidException;
 import org.eclipse.jgit.errors.RepositoryNotFoundException;
 import org.eclipse.jgit.http.server.GitServlet;
@@ -32,7 +34,6 @@ import org.eclipse.jgit.lib.Config;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.RepositoryCache;
 import org.eclipse.jgit.lib.RepositoryCache.FileKey;
-import org.eclipse.jgit.storage.file.FileBasedConfig;
 import org.eclipse.jgit.transport.resolver.RepositoryResolver;
 import org.eclipse.jgit.util.FS;
 import org.slf4j.Logger;
@@ -42,7 +43,6 @@ import javax.servlet.Servlet;
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.*;
 
@@ -134,12 +134,14 @@ class DevServer {
 
     private Handler staticHandler() throws IOException {
         ResourceHandler rh = new ResourceHandler();
+        URL url = DevServer.class.getResource("/com/google/gitiles/static");
+        Resource resource = null;
         try {
-            URL url = DevServer.class.getResource("/com/google/gitiles/static");
-            rh.setBaseResource(new PathResource(url));
-        } catch (URISyntaxException e) {
-            throw new IOException(e);
+            resource = new PathResource(url);
+        } catch (Exception e) {
+            resource = JarResource.newResource(url);
         }
+        rh.setBaseResource(resource);
         rh.setWelcomeFiles(new String[]{});
         rh.setDirectoriesListed(false);
         ContextHandler handler = new ContextHandler("/+static");
