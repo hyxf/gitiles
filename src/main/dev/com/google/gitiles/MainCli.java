@@ -81,7 +81,6 @@ public class MainCli {
             params.setUrl(url);
             new DevServer(GitilesConfig.defaultFile(), params).start(params);
         } catch (Exception e) {
-            e.printStackTrace();
             hf.printHelp(CMD, String.format("\n%s\n\n", CMD), options, "\nmake it easy!", true);
         }
     }
