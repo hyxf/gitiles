@@ -85,8 +85,9 @@ class DevServer {
         httpd.setHandler(handler());
     }
 
-    void start() throws Exception {
+    void start(MainCli.Params params) throws Exception {
         httpd.start();
+        log.info(String.format("running at http://%s:%d/", params.getIp(), params.getPort()));
         httpd.join();
     }
 

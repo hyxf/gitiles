@@ -78,7 +78,7 @@ public class MainCli {
                 url = String.format("http://%s:%d/git/", ip, port);
             }
             params.setUrl(url);
-            new DevServer(GitilesConfig.defaultFile(), params).start();
+            new DevServer(GitilesConfig.defaultFile(), params).start(params);
         } catch (Exception e) {
             e.printStackTrace();
             hf.printHelp(CMD, String.format("\n%s\n\n", CMD), options, "\nmake it easy!", true);
