@@ -39,7 +39,8 @@ public class MainCli {
 
 
     public static void main(String[] args) {
-        run(new String[]{"-d", "/Users/hyxf/mirror/gitee", "-i", "127.0.0.1"});
+        //run(new String[]{"-d", "/Users/hyxf/mirror/gitee", "-i", "127.0.0.1"});
+        run(args);
     }
 
     private static void run(String[] args) {
