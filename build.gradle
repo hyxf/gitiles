@@ -1,7 +1,33 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'org.springframework.boot:spring-boot-gradle-plugin:2.0.4.RELEASE'
+    }
+}
+
 group 'com.gutils'
 version '1.0'
 
 apply plugin: 'application'
+
+apply plugin: 'org.springframework.boot'
+
+springBoot {
+    mainClassName "com.google.gitiles.MainCli"
+}
+
+sourceSets {
+    main {
+        java {
+            srcDirs 'src/main/java', 'src/main/dev'
+        }
+        resources {
+            srcDir 'src/main/resources'
+        }
+    }
+}
 
 ext {
     basePath = project.projectDir.absolutePath
@@ -70,4 +96,6 @@ dependencies {
 
     testCompile "junit:junit:4.11"
     testCompile "org.hamcrest:hamcrest-core:1.3"
+
+    compile group: 'commons-cli', name: 'commons-cli', version: '1.4'
 }
