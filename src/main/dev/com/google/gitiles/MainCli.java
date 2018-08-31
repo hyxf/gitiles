@@ -36,10 +36,11 @@ public class MainCli {
     private static final String ARG_DIR = "dir";
     private static final String ARG_TITLE = "title";
     private static final String ARG_URL = "url";
+    private static final String ARG_PUSH = "push";
 
 
     public static void main(String[] args) {
-//        run(new String[]{"-d", "/Users/hyxf/mirror/github", "-i", "127.0.0.1"});
+//        run(new String[]{"-d", "/Users/hyxf/mirror/github", "-i", "127.0.0.1", "--push"});
         run(args);
     }
 
@@ -50,6 +51,7 @@ public class MainCli {
         options.addRequiredOption("d", ARG_DIR, true, "git mirror directory");
         options.addOption("t", ARG_TITLE, true, "Web title");
         options.addOption("u", ARG_URL, true, "git url");
+        options.addOption("", ARG_PUSH, false, "support push?");
         //-----
         HelpFormatter hf = new HelpFormatter();
         hf.setWidth(110);
@@ -79,7 +81,9 @@ public class MainCli {
                 url = String.format("http://%s:%d/git/", ip, port);
             }
             params.setUrl(url);
-            new DevServer(GitilesConfig.defaultFile(), params).start(params);
+            params.setPush(cmd.hasOption(ARG_PUSH));
+
+            new DevServer(params).start();
         } catch (Exception e) {
             hf.printHelp(CMD, String.format("\n%s\n\n", CMD), options, "\nmake it easy!", true);
         }
@@ -124,6 +128,15 @@ public class MainCli {
     public static final class Params {
         private String dir;
         private String ip;
+        private boolean push;
+
+        public boolean isPush() {
+            return push;
+        }
+
+        public void setPush(boolean push) {
+            this.push = push;
+        }
 
         public int getPort() {
             return port;

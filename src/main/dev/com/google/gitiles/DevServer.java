@@ -17,6 +17,7 @@ package com.google.gitiles;
 import com.google.common.base.Strings;
 import com.google.common.html.types.UncheckedConversions;
 import com.google.gitiles.doc.HtmlSanitizer;
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.ContextHandler;
@@ -27,14 +28,14 @@ import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.resource.JarResource;
 import org.eclipse.jetty.util.resource.PathResource;
 import org.eclipse.jetty.util.resource.Resource;
-import org.eclipse.jgit.errors.ConfigInvalidException;
 import org.eclipse.jgit.errors.RepositoryNotFoundException;
 import org.eclipse.jgit.http.server.GitServlet;
-import org.eclipse.jgit.lib.Config;
-import org.eclipse.jgit.lib.Constants;
-import org.eclipse.jgit.lib.RepositoryCache;
+import org.eclipse.jgit.lib.*;
 import org.eclipse.jgit.lib.RepositoryCache.FileKey;
+import org.eclipse.jgit.transport.ReceivePack;
+import org.eclipse.jgit.transport.resolver.ReceivePackFactory;
 import org.eclipse.jgit.transport.resolver.RepositoryResolver;
+import org.eclipse.jgit.transport.resolver.ServiceNotEnabledException;
 import org.eclipse.jgit.util.FS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,22 +71,17 @@ class DevServer {
 
     private final Config cfg;
     private final Server httpd;
+    private MainCli.Params params;
 
-    DevServer(File cfgFile, MainCli.Params params) throws IOException, ConfigInvalidException {
+    DevServer(MainCli.Params params) throws IOException {
         Config cfg = defaultConfig(params);
-//        if (cfgFile.exists() && cfgFile.isFile()) {
-//            FileBasedConfig fcfg = new FileBasedConfig(cfg, cfgFile, FS.DETECTED);
-//            fcfg.load();
-//            cfg = fcfg;
-//        } else {
-//            log.info("Config file {} not found, using defaults", cfgFile.getPath());
-//        }
+        this.params = params;
         this.cfg = cfg;
         httpd = new Server(params.getPort());
         httpd.setHandler(handler());
     }
 
-    void start(MainCli.Params params) throws Exception {
+    void start() throws Exception {
         httpd.start();
         log.info(String.format("running at http://%s:%d/", params.getIp(), params.getPort()));
         httpd.join();
@@ -99,12 +95,6 @@ class DevServer {
     }
 
     private Handler appHandler() {
-//    DebugRenderer renderer =
-//        new DebugRenderer(
-//            STATIC_PREFIX,
-//            Arrays.asList(cfg.getStringList("gitiles", null, "customTemplates")),
-//            sourceRoot.resolve("resources/com/google/gitiles/templates").toString(),
-//            firstNonNull(cfg.getString("gitiles", null, "siteTitle"), "Gitiles"));
         DefaultRenderer renderer = new DefaultRenderer(
                 STATIC_PREFIX,
                 Arrays.stream(cfg.getStringList("gitiles", null, "customTemplates"))
@@ -124,6 +114,30 @@ class DevServer {
         handler.addServlet(new ServletHolder(servlet), "/*");
         //----- support git http server
         GitServlet gitServlet = new GitServlet();
+        gitServlet.setReceivePackFactory(new ReceivePackFactory<HttpServletRequest>() {
+            @Override
+            public ReceivePack create(HttpServletRequest req, Repository db) throws ServiceNotEnabledException {
+                if (params.isPush()) {
+                    String user = req.getRemoteUser();
+                    if (StringUtils.isEmpty(user)) {
+                        user = "anonymous";
+                    }
+                    return createFor(req, db, user);
+                }
+                throw new ServiceNotEnabledException();
+            }
+
+            private ReceivePack createFor(final HttpServletRequest req,
+                                          final Repository db, final String user) {
+                final ReceivePack rp = new ReceivePack(db);
+                rp.setRefLogIdent(toPersonIdent(req, user));
+                return rp;
+            }
+
+            private PersonIdent toPersonIdent(HttpServletRequest req, String user) {
+                return new PersonIdent(user, user + "@" + req.getRemoteHost());
+            }
+        });
         ServletHolder servletHolder = new ServletHolder(gitServlet);
         Map<String, String> params = new HashMap<String, String>();
         params.put("base-path", cfg.getString("gitiles", null, "basePath"));
