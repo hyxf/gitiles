@@ -122,12 +122,14 @@ class DevServer {
         ServletContextHandler handler = new ServletContextHandler();
         handler.setContextPath("");
         handler.addServlet(new ServletHolder(servlet), "/*");
-        //----- 支持 git http server
-        ServletHolder gitHolder = handler.addServlet(GitServlet.class, "/git/*");
+        //----- support git http server
+        GitServlet gitServlet = new GitServlet();
+        ServletHolder servletHolder = new ServletHolder(gitServlet);
         Map<String, String> params = new HashMap<String, String>();
         params.put("base-path", cfg.getString("gitiles", null, "basePath"));
         params.put("export-all", cfg.getString("gitiles", null, "exportAll"));
-        gitHolder.setInitParameters(params);
+        servletHolder.setInitParameters(params);
+        handler.addServlet(servletHolder, "/git/*");
         //-----
         return handler;
     }
