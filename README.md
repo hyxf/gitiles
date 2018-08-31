@@ -20,16 +20,19 @@ Mac 服务配置【支持开机启动】
 
 ### 运行[单独 jar]
 
+> 支持 git http服务器 功能
+
 Download [the latest JAR](https://github.com/hyxf/gitiles/releases/latest)
 
 运行
 
 ~~~bash
 ~ java -jar gitiles-1.0.0.jar
-usage: gitiles -d <arg> [-i <arg>] [-p <arg>] [-t <arg>] [-u <arg>]
+usage: gitiles [-] -d <arg> [-i <arg>] [-p <arg>] [-t <arg>] [-u <arg>]
 
 gitiles
 
+ -,--push           support push?
  -d,--dir <arg>     git mirror directory
  -i,--ip <arg>      ip
  -p,--port <arg>    port
