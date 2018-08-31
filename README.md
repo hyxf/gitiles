@@ -20,8 +20,6 @@ Mac 服务配置【支持开机启动】
 
 ### 运行[单独 jar]
 
-> 支持 git http服务器 功能
-
 Download [the latest JAR](https://github.com/hyxf/gitiles/releases/latest)
 
 运行
@@ -51,17 +49,3 @@ gradle clean jar
 ------------------------------
 
 ### 支持 git http server
-
-> 类：DevServer.java
->
-> 方法：appHandler
-
-~~~java
-    //----- 支持 git http server
-    ServletHolder gitHolder = handler.addServlet(GitServlet.class,"/git/*");
-    Map<String, String> params = new HashMap<String,String>();
-    params.put("base-path",cfg.getString("gitiles",null,"basePath"));
-    params.put("export-all",cfg.getString("gitiles",null,"exportAll"));
-    gitHolder.setInitParameters(params);
-    //-----
-~~~
