@@ -12,14 +12,9 @@ dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.PREFER_PROJECT)
     repositories {
         mavenLocal()
-
         maven {
             url = uri("https://maven.aliyun.com/repository/public")
         }
-        flatDir {
-            dirs("libs")
-        }
-
     }
 }
 
