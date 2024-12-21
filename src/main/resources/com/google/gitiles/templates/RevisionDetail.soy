@@ -1,0 +1,67 @@
+// Copyright 2012 Google Inc. All Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+{namespace com.google.gitiles.templates.RevisionDetail}
+
+import * as common from 'com/google/gitiles/templates/Common.soy';
+import * as objDetail from 'com/google/gitiles/templates/ObjectDetail.soy';
+
+/**
+ * Detail page about a single revision.
+ */
+{template revisionDetail stricthtml="false"}
+  {@param title: ?}  /** human-readable revision name. */
+  {@param repositoryName: ?}  /** name of this repository. */
+  {@param? menuEntries: ?}  /** menu entries. */
+  {@param? customVariant: ?}  /** variant name for styling. */
+  {@param breadcrumbs: ?}  /** breadcrumbs for this page. */
+  {@param? hasBlob: ?}  /** set to true if the revision or its peeled value is a blob. */
+  {@param? hasReadme: ?}  /** set to true if the treeDetail has readmeHtml. */
+  {@param objects: ?}  /** list of objects encountered when peeling this object. Each object has a
+      "type" key with one of the org.eclipse.jgit.lib.Contants.TYPE_* constant strings, and a "data"
+      key with an object whose keys correspond to the appropriate object detail template from
+      ObjectDetail.soy. */
+  {@inject staticUrls: ?}
+{if $hasBlob}
+  {call common.header data="all"}
+    {param css: [$staticUrls.PRETTIFY_CSS_URL] /}
+  {/call}
+{elseif $hasReadme}
+  {call common.header data="all"}
+    {param css: [$staticUrls.DOC_CSS_URL, $staticUrls.PRETTIFY_CSS_URL] /}
+  {/call}
+{else}
+  {call common.header data="all" /}
+{/if}
+
+{for $object in $objects}
+  {switch $object.type}
+    {case 'commit'}
+      {call objDetail.commitDetail data="$object.data" /}
+    {case 'tree'}
+      {call objDetail.treeDetail data="$object.data" /}
+    {case 'blob'}
+      {call objDetail.blobDetail data="$object.data" /}
+    {case 'tag'}
+      {call objDetail.tagDetail data="$object.data" /}
+    {default}
+      <div class="error">
+        {msg desc="Error message for an unknown object type"}Object has unknown type.{/msg}
+      </div>
+  {/switch}
+{/for}
+
+{call common.footer}
+  {param customVariant: $customVariant /}
+{/call}
+{/template}

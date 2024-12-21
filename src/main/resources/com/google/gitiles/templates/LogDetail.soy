@@ -1,0 +1,330 @@
+// Copyright 2012 Google Inc. All Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+{namespace com.google.gitiles.templates.LogDetail}
+
+import * as common from 'com/google/gitiles/templates/Common.soy';
+import * as objDetail from 'com/google/gitiles/templates/ObjectDetail.soy';
+
+/**
+ * Detail page showing a shortlog for a commit.
+ */
+{template logDetail stricthtml="false"}
+  {@param title: ?}  /** human-readable revision name. */
+  {@param repositoryName: ?}  /** name of this repository. */
+  {@param? menuEntries: ?}  /** menu entries. */
+  {@param? customVariant: ?}  /** variant name for custom styling. */
+  {@param breadcrumbs: ?}  /** breadcrumbs for this page. */
+  {@param? tags: ?}  /** optional list of tags encountered when peeling this object, with keys
+      corresponding to gitiles.tagDetail. */
+  {call common.header data="all" /}
+
+{if $tags}
+  {for $tag in $tags}
+    {call objDetail.tagDetail data="$tag" /}
+  {/for}
+{/if}
+
+{call common.streamingPlaceholder /}
+
+{call common.footer}
+  {param customVariant: $customVariant /}
+{/call}
+{/template}
+
+
+/**
+ * Header for list of log entries.
+ */
+{template logEntriesHeader stricthtml="false"}
+  {@param? previousUrl: ?}  /** URL for the previous page of results. */
+{if $previousUrl}
+  <nav class="LogNav">
+    <a class="LogNav-prev" href="{$previousUrl}">{msg desc="text for previous URL"}&laquo; Previous{/msg}</a>
+  </nav>
+{/if}
+
+<ol class="CommitLog">
+{/template}
+
+
+/**
+ * Wrapper for a single log entry with pretty format and variant.
+ */
+{template logEntryWrapper}
+  {@param variant: string}  /** variant name for log entry template. */
+  {@param entry: ?}  /** log entry; see .logEntry. */
+<li class="CommitLog-item CommitLog-item--{$variant}">
+  {call logEntry variant="$variant" data="$entry" /}
+</li>
+{/template}
+
+
+/**
+ * Footer for the list of log entries.
+ */
+{template logEntriesFooter stricthtml="false"}
+  {@param? nextUrl: ?}  /** URL for the next page of results. */
+  {@param? nextText: ?}  /** text for next page link. */
+</ol>
+{if $nextUrl}
+  <nav class="LogNav">
+    <a class="LogNav-next" href="{$nextUrl}">{$nextText} &raquo;</a>
+  </nav>
+{/if}
+{/template}
+
+/**
+ * Single log entry indicating the full log is empty.
+ */
+{template emptyLog}
+<li class="CommitLog-item CommitLog-item--empty">{msg desc="informational text for when the log is empty"}No commits.{/msg}</li>
+{/template}
+
+/**
+ * Single pretty log entry, similar to --pretty=oneline.
+ */
+{template oneLineLogEntry visibility="private" modifies="logEntry" variant="'oneline'"}
+  {@param abbrevSha: ?}  /** abbreviated SHA-1. */
+  {@param sha: ?}  /** commit SHA-1. */
+  {@param url: ?}  /** URL to commit detail page. */
+  {@param shortMessage: ?}  /** short commit message. */
+  {@param message: ?}  /** list of commit message parts, where each part contains:
+      text: raw text of the part.
+      url: optional URL that should be linked to from the part.
+      */
+  {@param author: ?}  /** author information with at least "name" and "relativeTime" keys. */
+  {@param committer: ?}  /** committer information with at least "time" and "relativeTime" keys. */
+  {@param branches: ?}  /** list of branches for this entry, with "name" and "url" keys. */
+  {@param tags: ?}  /** list of tags for this entry, with "name" and "url" keys. */
+  {@param diffTree: ?}  /** unused in this variant. */
+  {@param rename: ?}  /** if this entry was a rename or a copy of the path, an object containg:
+      changeType: the change type, "RENAME" or "COPY".
+      oldPath: the old path prior to the rename or copy.
+      newPath: the new path after the rename or copy.
+      score: the similarity score of the rename or copy.
+      */
+<a class="u-sha1 u-monospace CommitLog-sha1" href="{$url}">{$abbrevSha}</a>
+{sp}<a href="{$url}">{$shortMessage}</a>
+{sp}<span class="CommitLog-author" title="{$author.email}">{msg desc="commit author name"}by {$author.name}{/msg}</span>
+{sp}<span class="CommitLog-time" title="{$author.time}">· {$author.relativeTime}</span>
+{if length($branches)}
+  {for $branch in $branches}
+    {sp}<a class="CommitLog-branchLabel" href="{$branch.url}">{$branch.name}</a>
+  {/for}
+{/if}
+{if length($tags)}
+  {for $tag in $tags}
+    {sp}<a class="CommitLog-tagLabel" href="{$tag.url}">{$tag.name}</a>
+  {/for}
+{/if}
+
+{if $rename}
+  <span class="CommitLog-rename">
+    [
+    {switch $rename.changeType}
+      {case 'RENAME'}
+        Renamed
+      {case 'COPY'}
+        Copied
+    {/switch}
+    {if $rename.score != 100}
+      {sp}({$rename.score}%)
+    {/if}
+    {sp}from {$rename.oldPath}]
+  </span>
+{/if}
+
+{/template}
+
+
+/**
+ * Default single log entry (oneline format).
+ */
+{template logEntry modifiable="true" legacydeltemplatenamespace="gitiles.LogEntry" usevarianttype="string"}
+  {@param abbrevSha: ?}  /** abbreviated SHA-1. */
+  {@param sha: ?}  /** commit SHA-1. */
+  {@param url: ?}  /** URL to commit detail page. */
+  {@param shortMessage: ?}  /** short commit message. */
+  {@param message: ?}  /** list of commit message parts, where each part contains:
+      text: raw text of the part.
+      url: optional URL that should be linked to from the part.
+      */
+  {@param author: ?}  /** author information with at least "name" and "relativeTime" keys. */
+  {@param committer: ?}  /** committer information with at least "time" and "relativeTime" keys. */
+  {@param branches: ?}  /** list of branches for this entry, with "name" and "url" keys. */
+  {@param tags: ?}  /** list of tags for this entry, with "name" and "url" keys. */
+  {@param diffTree: ?}  /** unused in this variant. */
+  {@param rename: ?}  /** if this entry was a rename or a copy of the path, an object containg:
+      changeType: the change type, "RENAME" or "COPY".
+      oldPath: the old path prior to the rename or copy.
+      newPath: the new path after the rename or copy.
+      score: the similarity score of the rename or copy.
+      */
+  {call logEntry variant="'oneline'" data="all" /}
+{/template}
+
+
+/**
+ * Single pretty log entry, similar to --pretty=full.
+ */
+{template fullLogEntry visibility="private" modifies="logEntry" variant="'full'"}
+  {@param abbrevSha: ?}  /** abbreviated SHA-1. */
+  {@param sha: ?}  /** commit SHA-1. */
+  {@param url: ?}  /** URL to commit detail page. */
+  {@param shortMessage: ?}  /** short commit message. */
+  {@param message: ?}  /** list of commit message parts, where each part contains:
+      text: raw text of the part.
+      url: optional URL that should be linked to from the part.
+      */
+  {@param author: ?}  /** author information with at least "name" and "relativeTime" keys. */
+  {@param committer: ?}  /** committer information with at least "time" and "relativeTime" keys. */
+  {@param branches: ?}  /** list of branches for this entry, with "name" and "url" keys. */
+  {@param tags: ?}  /** list of tags for this entry, with "name" and "url" keys. */
+  {@param diffTree: ?}  /** unused in this variant. */
+  {@param rename: ?}  /** if this entry was a rename or a copy of the path, an object containg:
+      changeType: the change type, "RENAME" or "COPY".
+      oldPath: the old path prior to the rename or copy.
+      newPath: the new path after the rename or copy.
+      score: the similarity score of the rename or copy.
+      */
+<div class="u-monospace Metadata">
+<table>
+  <tr>
+    <th class="Metadata-title">{msg desc="Header for commit SHA entry"}commit{/msg}</th>
+    <td class="sha1">
+      <a href="{$url}">{$sha}</a>
+    </td>
+    <td>
+      {if length($branches)}
+        {for $branch in $branches}
+          {sp}<a href="{$branch.url}" class="branch-label">{$branch.name}</a>
+        {/for}
+      {/if}
+      {if length($tags)}
+        {for $tag in $tags}
+          {sp}<a href="{$tag.url}" class="tag-label">{$tag.name}</a>
+        {/for}
+      {else}
+        {sp}
+      {/if}
+    </td>
+  </tr>
+  <tr>
+    <th class="Metadata-title">{msg desc="Header for commit author"}author{/msg}</th>
+    <td>
+      {call objDetail.person_ data="$author" /}
+    </td>
+    <td>{$author.time}</td>
+  </tr>
+  <tr>
+    <th class="Metadata-title">{msg desc="Header for committer"}committer{/msg}</th>
+    <td>
+      {call objDetail.person_ data="$committer" /}
+    </td>
+    <td>{$committer.time}</td>
+  </tr>
+  {if $rename}
+    <tr>
+      <td colspan="3">
+        <span class="CommitLog-rename">
+          [
+          {switch $rename.changeType}
+            {case 'RENAME'}
+              Renamed
+            {case 'COPY'}
+              Copied
+          {/switch}
+          {if $rename.score != 100}
+            {sp}({$rename.score}%)
+          {/if}
+          {sp}from {$rename.oldPath}]
+        </span>
+      </td>
+    </tr>
+  {/if}
+
+</table>
+</div>
+<pre class="u-pre u-monospace MetadataMessage">
+  {$message}
+</pre>
+{/template}
+
+/**
+ * Single pretty log entry, similar to --pretty=fuller
+ */
+{template fullerLogEntry visibility="private" modifies="logEntry" variant="'fuller'"}
+  {@param abbrevSha: ?}  /** abbreviated SHA-1. */
+  {@param sha: ?}  /** commit SHA-1. */
+  {@param url: ?}  /** URL to commit detail page. */
+  {@param shortMessage: ?}  /** short commit message. */
+  {@param message: ?}  /** list of commit message parts, where each part contains: text: raw text of
+      the part. url: optional URL that should be linked to from the part. */
+  {@param author: ?}  /** author information with at least "name" and "relativeTime" keys. */
+  {@param committer: ?}  /** committer information with at least "time" and "relativeTime" keys. */
+  {@param branches: ?}  /** list of branches for this entry, with "name" and "url" keys. */
+  {@param tags: ?}  /** list of tags for this entry, with "name" and "url" keys. */
+  {@param diffTree: ?}  /** list of changed tree entries with the following keys: changeType: string
+      matching an org.eclipse.jgit.diff.DiffEntry.ChangeType constant. path: (new) path of the tree
+      entry. oldPath: old path, only for renames and copies. url: URL to a detail page for the tree
+      entry. diffUrl: URL to a diff page for the tree entry's diff in this commit. */
+  {@param rename: ?}  /** if this entry was a rename or a copy of the path, an object containg:
+      changeType: the change type, "RENAME" or "COPY". oldPath: the old path prior to the rename or
+      copy. newPath: the new path after the rename or copy. score: the similarity score of the
+      rename or copy. */
+{call logEntry variant="'full'" data="all" /}
+
+{if $diffTree && length($diffTree)}
+  <ul class="DiffTree">
+    {for $entry in $diffTree}
+      <li>
+        <a href="{$entry.url}">{$entry.path}</a>
+        {switch $entry.changeType}
+          {case 'ADD'}
+            <span class="DiffTree-action DiffTree-action--add">
+              {msg desc="Text for a new tree entry"}
+                [Added - <a href="{$entry.diffUrl}">diff</a>]
+              {/msg}
+            </span>
+          {case 'MODIFY'}
+            <span class="DiffTree-action DiffTree-action--modify">
+              {msg desc="Text for a modified tree entry"}
+                [<a href="{$entry.diffUrl}">diff</a>]
+              {/msg}
+            </span>
+          {case 'DELETE'}
+            <span class="DiffTree-action DiffTree-action--delete">
+              {msg desc="Text for a deleted tree entry"}
+                [Deleted - <a href="{$entry.diffUrl}">diff</a>]
+              {/msg}
+            </span>
+          {case 'RENAME'}
+            <span class="DiffTree-action DiffTree-action--rename">
+              {msg desc="Text for a renamed tree entry"}
+                [Renamed from {$entry.oldPath} - <a href="{$entry.diffUrl}">diff</a>]
+              {/msg}
+            </span>
+          {case 'COPY'}
+            <span class="DiffTree-action DiffTree-action--copy">
+              {msg desc="Text for a copied tree entry"}
+                [Copied from {$entry.oldPath} - <a href="{$entry.diffUrl}">diff</a>]
+              {/msg}
+            </span>
+          {default}
+        {/switch}
+      </li>
+    {/for}
+  </ul>
+{/if}
+{/template}

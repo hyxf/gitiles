@@ -1,0 +1,100 @@
+// Copyright 2015 Google Inc. All Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+{namespace com.google.gitiles.templates.Doc}
+
+import * as common from 'com/google/gitiles/templates/Common.soy';
+
+/**
+ * Default Doc Footer
+ */
+{template customDocFooter modifiable="true" legacydeltemplatenamespace="gitiles.customDocFooter" usevarianttype="string"}
+  {@param? sourceUrl: ?}  /** url for source view of the page. */
+  {@param? logUrl: ?}  /** url for log history of page. */
+  {@param? blameUrl: ?}  /** url for blame of page source. */
+<!-- default customDocFooter -->
+<footer class="Site-footer">
+  <div class="Footer">
+    {call common.footerPoweredBy /}
+    <div class="Footer-links">
+      {if $sourceUrl}<a class="Footer-link" href="{$sourceUrl}">{msg desc="text for the source link"}source{/msg}</a>{/if}
+      {if $logUrl}<a class="Footer-link" href="{$logUrl}">{msg desc="text for the log link"}log{/msg}</a>{/if}
+      {if $blameUrl}<a class="Footer-link" href="{$blameUrl}">{msg desc="text for the blame link"}blame{/msg}</a>{/if}
+    </div>
+  </div>
+</footer>
+{/template}
+
+/**
+ * Documentation page rendered from markdown.
+ */
+{template markdownDoc}
+  {@param? siteTitle: ?}  /** h1 title from navbar.md. */
+  {@param pageTitle: ?}  /** h1 title from specific page. */
+  {@param? logoUrl: ?}  /** url of image logo. */
+  {@param? homeUrl: ?}  /** url to jump to top of site. */
+  {@param? analyticsId: ?}  /** Google Analytics Property ID. */
+  {@param? navbarHtml: ?}  /** navar.md converted to SafeHtml. */
+  {@param? customVariant: ?}  /** variant name for custom styling. */
+  {@inject staticUrls: ?}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>
+    {if $siteTitle}{$siteTitle} -{sp}{/if}
+    {$pageTitle}
+  </title>
+  <link rel="stylesheet" type="text/css" href="{$staticUrls.BASE_CSS_URL}" />
+  <link rel="stylesheet" type="text/css" href="{$staticUrls.DOC_CSS_URL}" />
+  <link rel="stylesheet" type="text/css" href="{$staticUrls.PRETTIFY_CSS_URL}" />
+  {call common.customHeadTagPart variant="'' + ($customVariant ?? '')" /}
+</head>
+<body class="Site">
+  <header class="Site-header {if $navbarHtml}Site-header--withNavbar{/if}">
+    <div class="Header">
+      <div class="Header-title">
+        {if $homeUrl}<a class="Header-anchor" href="{$homeUrl}">{/if}
+        {if $logoUrl}<img class="Header-anchorLogo" src="{$logoUrl}" alt="project logo" />{/if}
+        {if $siteTitle}<span class="Header-anchorTitle">{$siteTitle}</span>{/if}
+        {if $homeUrl}</a>{/if}
+      </div>
+    </div>
+    {if $navbarHtml}
+      <nav class="Header-nav" role="navigation">
+        {$navbarHtml}
+      </nav>
+    {/if}
+  </header>
+  <div class="Site-content Site-Content--markdown">
+    <div class="Container">
+      <div class="doc">
+        {call common.streamingPlaceholder /}
+      </div>
+    </div>
+  </div>
+  {call customDocFooter variant="'' + ($customVariant ?? '')" /}
+  {if $analyticsId}
+    /* From https://developers.google.com/analytics/devguides/collection/analyticsjs/ */
+    <script>
+    window.ga=window.ga||function(){lb}(ga.q=ga.q||[]).push(arguments){rb};ga.l=+new Date;
+
+    ga('create', '{$analyticsId}', 'auto');
+    ga('send', 'pageview', {lb}title: '{$pageTitle}'{rb});
+    </script>
+    <script async src="https://www.google-analytics.com/analytics.js"></script>
+  {/if}
+</body>
+</html>
+{/template}

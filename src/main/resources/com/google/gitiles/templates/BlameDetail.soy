@@ -1,0 +1,89 @@
+// Copyright 2014 Google Inc. All Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+{namespace com.google.gitiles.templates.BlameDetail}
+
+import * as common from 'com/google/gitiles/templates/Common.soy';
+import * as objDetail from 'com/google/gitiles/templates/ObjectDetail.soy';
+
+/**
+ * Detail page showing blame info for a file.
+ */
+{template blameDetail stricthtml="false"}
+  {@param title: ?}  /** human-readable revision name. */
+  {@param repositoryName: ?}  /** name of this repository. */
+  {@param? menuEntries: ?}  /** menu entries. */
+  {@param? customVariant: ?}  /** variant name for custom styling. */
+  {@param breadcrumbs: ?}  /** breadcrumbs for this page. */
+  {@param data: ?}  /** blob data, matching the params for .blobBox. */
+  {@param? regions: ?}  /** for non-binary files, list of regions, one per line, with the following
+      keys:
+        abbrevSha: abbreviated SHA-1 of revision for this line; if missing, assume blame info is
+          missing.
+        author: author information with at least "name" and "relativeTime" keys.
+        time: time of the revision.
+        blameUrl: URL for a blame of this file at this commit.
+        commitUrl: URL for detail about the commit.
+        diffUrl: URL for a diff of this file at this commit.
+        class: class name for tr. All keys but "class" are optional.
+      */
+  {@inject staticUrls: ?}
+{if $regions}
+  {call common.header data="all"}
+    {param css: [$staticUrls.PRETTIFY_CSS_URL] /}
+    {param containerClass: 'Container--fullWidth' /}
+  {/call}
+
+  {call objDetail.blobHeader data="$data" /}
+
+  <table class="Blame">
+    {for $line, $i in $data.lines}
+      {let $region: $regions[$i] /}
+      <tr class="Blame-region {$region.class}">
+        {if $region.abbrevSha != null}
+          <td class="Blame-author">{$region.author.name}</td>
+          <td class="Blame-sha1"><a class="u-sha1 u-monospace Blame-sha1" href="{$region.commitUrl}">{$region.abbrevSha}</a></td>
+          <td class="Blame-time">{$region.author.time}</td>
+          <td class="Blame-regionLink">
+            [<a href="{$region.diffUrl}">{msg desc="text for diff URL"}diff{/msg}</a>]
+            [<a href="{$region.blameUrl}">{msg desc="text for blame URL"}{$region.blameText}{/msg}</a>]
+          </td>
+        {else}
+          <td colspan="4"></td>
+        {/if}
+        {let $n: $i + 1 /}
+        <td class="Blame-lineNum">
+          <a class="u-monospace u-lineNum" href="#{$n}" name="{$n}">{$n}</a>
+        </td>
+        <td class="u-pre u-monospace Blame-lineContent">
+          {for $span in $line}
+            <span class="{$span.classes}">{$span.text}</span>
+          {/for}
+        </td>
+      </tr>
+    {/for}
+  </table>
+{else}
+  {call common.header data="all" /}
+  {call objDetail.blobDetail data="$data" /}
+  <div class="FileContents-binary">
+    {msg desc="blame not available for binary file"}
+      No blame information available
+    {/msg}
+  </div>
+{/if}
+
+{call common.footer}
+  {param customVariant: $customVariant /}
+{/call}
+{/template}

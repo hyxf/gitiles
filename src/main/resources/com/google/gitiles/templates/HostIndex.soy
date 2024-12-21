@@ -1,0 +1,70 @@
+// Copyright 2012 Google Inc. All Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+{namespace com.google.gitiles.templates.HostIndex}
+
+import * as common from 'com/google/gitiles/templates/Common.soy';
+
+/**
+ * HTML page for /.
+ */
+{template hostIndex stricthtml="false"}
+  {@param hostName: ?}  /** host name. */
+  {@param? menuEntries: ?}  /** menu entries. */
+  {@param? customVariant: ?}  /** variant name for custom styling. */
+  {@param? prefix: ?}  /** prefix path for matching repositories. */
+  {@param? breadcrumbs: ?}  /** map of breadcrumbs for header. */
+  {@param repositories: ?}  /** list of repository description maps with name, cloneUrl, and
+      optional description values. */
+{call common.header}
+  {param title: $prefix ? $prefix : $hostName ? $hostName + ' Git repositories' : 'Git repositories' /}
+  {param menuEntries: $menuEntries /}
+  {param breadcrumbs: $breadcrumbs /}
+  {param customVariant: $customVariant /}
+{/call}
+
+{if length($repositories)}
+  {if !$breadcrumbs}
+    <h1>
+      {msg desc="Git repositories available on the host"}
+        Git repositories on {$hostName}
+      {/msg}
+    </h1>
+  {/if}
+
+  <div class="RepoList">
+    <div class="RepoList-item RepoList-item--header">
+      <span class="RepoList-itemName">
+        {msg desc="column header for repository name"}
+          Name
+        {/msg}
+      </span>
+      <span class="RepoList-itemDescription">
+        {msg desc="column header for repository description"}
+          Description
+        {/msg}
+      </span>
+    </div>
+    {for $repo in $repositories}
+      <a class="RepoList-item" href="{$repo.url}">
+        <span class="RepoList-itemName">{$repo.name}</span>
+        <span class="RepoList-itemDescription">{$repo.description}</span>
+      </a>
+    {/for}
+  </div>
+{/if}
+
+{call common.footer}
+  {param customVariant: $customVariant /}
+{/call}
+{/template}

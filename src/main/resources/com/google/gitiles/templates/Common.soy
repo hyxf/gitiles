@@ -1,0 +1,175 @@
+// Copyright 2012 Google Inc. All Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+{namespace com.google.gitiles.templates.Common}
+
+/**
+ * Common header for Gitiles.
+ */
+{template header stricthtml="false"}
+  {@param title: ?}  /** title for this page. Always suffixed with repository name and a sitewide
+      title. */
+  {@param? repositoryName: ?}  /** repository name for this page, if applicable. */
+  {@param? menuEntries: ?}  /** optional list of menu entries with "text" and optional "url" keys.
+      */
+  {@param? customVariant: ?}  /** variant name for custom styling. */
+  {@param breadcrumbs: ?}  /** navigation breadcrumbs for this page. */
+  {@param? css: list<?>|null}  /** optional list of CSS URLs to include. */
+  {@param? containerClass: ?}  /** optional class to append to the main container. */
+  {@inject staticUrls: ?}
+  {@inject SITE_TITLE: string}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>
+    {$title}
+    {if $repositoryName}
+      {sp}- {$repositoryName}
+    {/if}
+    {sp}- {msg desc="name of the application"}
+      {$SITE_TITLE}
+    {/msg}
+  </title>
+
+  <link rel="stylesheet" type="text/css" href="{$staticUrls.BASE_CSS_URL}">
+  {if $css && length($css)}
+    {for $url in $css}
+      <link rel="stylesheet" type="text/css" href="{$url}">
+    {/for}
+  {/if}
+  {call customHeadTagPart variant="'' + ($customVariant ?? '')" /}
+
+</head>
+<body class="Site">
+  <header class="Site-header">
+    <div class="Header">
+      {call customHeader variant="'' + ($customVariant ?? '')" /}
+
+      {if $menuEntries && length($menuEntries)}
+        <div class="Header-menu">
+        {for $entry in $menuEntries}
+          {sp}
+          {if $entry.url}
+            <a class="Header-menuItem" href="{$entry.url}">{$entry.text}</a>
+          {else}
+            <span class="Header-menuItem Header-menuItem--noAction">{$entry.text}</span>
+          {/if}
+        {/for}
+        {sp}
+        </div>
+      {/if}
+    </div>
+  </header>
+
+  <div class="Site-content">
+    <div class="Container {if $containerClass}{$containerClass}{/if}">
+      {if $breadcrumbs && length($breadcrumbs)}
+        <div class="Breadcrumbs">
+          {for $entry, $index in $breadcrumbs}
+            {if $index > 0}{sp}/{sp}{/if}
+            {if $index  < length($breadcrumbs) - 1}
+              <a class="Breadcrumbs-crumb" href="{$entry.url}">{$entry.text}</a>
+            {else}
+              <span class="Breadcrumbs-crumb">{$entry.text}</span>
+            {/if}
+          {/for}
+        </div>
+      {/if}
+{/template}
+
+/**
+ * Default (empty) custom head tag part
+ *
+ * This can be used to include per-project CSS/JS by
+ * providing custom variants.
+ */
+{template customHeadTagPart modifiable="true" legacydeltemplatenamespace="gitiles.customHeadTagPart" usevarianttype="string"}
+  <!-- default customHeadTagPart -->
+{/template}
+
+/**
+ * Default custom header implementation for Gitiles.
+ */
+{template customHeader modifiable="true" legacydeltemplatenamespace="gitiles.customHeader" usevarianttype="string"}
+  {@inject SITE_TITLE: string}
+<!-- default customHeader -->
+<div class="Header-title">
+  {msg desc="short name of the application"}
+    {$SITE_TITLE}
+  {/msg}
+</div>
+{/template}
+
+/**
+ * Footer 'powered by' element
+ *
+ * Please call this in custom variants as well.
+ */
+{template footerPoweredBy modifiable="true" legacydeltemplatenamespace="gitiles.footerPoweredBy"}
+<span class="Footer-poweredBy">
+  Powered by <a href="https://gerrit.googlesource.com/gitiles/">Gitiles</a>
+</span>
+{/template}
+
+/**
+ * Footer format badge
+ *
+ * You can use this in custom footers as well.
+ */
+{template footerFormatBadge modifiable="true" legacydeltemplatenamespace="gitiles.footerFormatBadge"}
+<span class="Footer-formats">
+  <a class="u-monospace Footer-formatsItem" href="?format=TEXT">{msg desc="text format"}txt{/msg}</a>
+    {sp}
+  <a class="u-monospace Footer-formatsItem" href="?format=JSON">{msg desc="JSON format"}json{/msg}</a>
+</span>
+{/template}
+
+/**
+ * Default Footer
+ */
+{template customFooter modifiable="true" legacydeltemplatenamespace="gitiles.customFooter" usevarianttype="string"}
+<!-- default customFooter -->
+<footer class="Site-footer">
+  <div class="Footer">
+    {call footerPoweredBy /}
+    {call footerFormatBadge /}
+  </div>
+</footer>
+{/template}
+
+/**
+ * Main footer.
+ *
+ * The footer tag part can be customized by creating a customFooter
+ * variant template.
+ */
+{template footer stricthtml="false"}
+  {@param? customVariant: ?}  /** variant name for custom styling. */
+    </div> <!-- Container -->
+  </div> <!-- Site-content -->
+  {call customFooter variant="'' + ($customVariant ?? '')" /}
+</body>
+</html>
+{/template}
+
+/**
+ * Placeholder for streaming rendering.
+ *
+ * Insert this in a template to use with
+ * Renderer#renderStreaming(HttpServletResponse, String).
+ */
+{template streamingPlaceholder}
+<br id="STREAMED-OUTPUT-BLOCK">
+{/template}
