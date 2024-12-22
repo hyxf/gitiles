@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "bill.jgit"
-version = "v1.5.0"
+version = "1.5.0"
 
 sourceSets{
     main{
