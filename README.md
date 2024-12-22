@@ -13,3 +13,7 @@ cd modules/jgit
 
 mvn install
 ~~~
+
+~~~bash
+shasum -a 256 filename
+~~~
